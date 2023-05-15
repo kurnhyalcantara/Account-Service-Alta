@@ -1,6 +1,7 @@
 package main
 
 import (
+	"alta/account-service-app/controllers"
 	"database/sql"
 	"fmt"
 	"log"
@@ -57,6 +58,19 @@ func main() {
 
 	switch choice {
 	case 1:
-		
+	
+	case 2: 
+		var phone, password string
+		fmt.Printf("No. Hp: ")
+		fmt.Scanln(&phone)
+		fmt.Printf("Password: ")
+		fmt.Scanln(&password)
+
+		loginId, err := controllers.LoginUser(db, phone, password)
+		if err != nil {
+			log.Fatal(err.Error())
+		} else {
+			fmt.Printf("Login berhasil! loginId: %d", loginId)
+		}
 	}
 }
