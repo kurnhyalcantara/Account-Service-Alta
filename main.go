@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -26,9 +25,9 @@ func main() {
 		fmt.Println("Database open!")
 	}
 
-	db.SetConnMaxLifetime(time.Minute * 10)
-	db.SetMaxOpenConns(2)
-	db.SetMaxIdleConns(0)
+	// db.SetConnMaxLifetime(time.Minute * 10)
+	// db.SetMaxOpenConns(10)
+	// db.SetMaxIdleConns(10)
 
 	// Test Connection
 	testError := db.Ping()
@@ -68,9 +67,15 @@ func main() {
 
 		loginId, err := controllers.LoginUser(db, phone, password)
 		if err != nil {
-			log.Fatal(err.Error())
+			fmt.Println(err)
 		} else {
-			fmt.Printf("Login berhasil! loginId: %d", loginId)
+			fmt.Printf("Login berhasil! loginId: %s", loginId)
 		}
+	
+	case 5: 
+		var phone string
+		fmt.Printf("Masukkan No. Anda: ")
+		fmt.Scanln(&phone)
+		controllers.DeleteUser(db, phone)
 	}
 }
