@@ -9,8 +9,23 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-func AddUser(db *sql.DB, user entities.Users) string {
-	return ""
+// AddUser berfungsi untuk menambahkan data pengguna baru ke dalam database.
+// Fungsi ini menerima parameter db yang merupakan objek database yang sudah terkoneksi,
+// dan user yang merupakan data pengguna yang ingin ditambahkan ke database.
+// Fungsi ini mengembalikan ID pengguna yang baru saja ditambahkan ke database.
+func AddUser(db *sql.DB, user entities.Users) (string, error) {
+	// generate unique ID untuk pengguna baru
+	userId, err := gonanoid.New(16)
+	if err != nil {
+		return "", fmt.Errorf("failed to generate UUID: %v", err)
+	}
+	// lakukan query untuk menyimpan data pengguna ke dalam database
+	user.UserId = userId
+	_, err = db.Exec("INSERT INTO users(user_id, name, phone, password) VALUES (?, ?, ?, ?)", user.UserId, user.Name, user.Phone, user.Password)
+	if err != nil {
+		return "", fmt.Errorf("failed to add user to database: %v", err)
+	}
+	return userId, nil
 }
 
 func LoginUser(db *sql.DB, phone string, password string) (string, error) {
