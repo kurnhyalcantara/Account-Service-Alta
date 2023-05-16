@@ -2,6 +2,7 @@ package main
 
 import (
 	"alta/account-service-app/controllers"
+	"alta/account-service-app/entities"
 	"database/sql"
 	"fmt"
 	"log"
@@ -27,8 +28,8 @@ func main() {
 	}
 
 	db.SetConnMaxLifetime(time.Minute * 10)
-	db.SetMaxOpenConns(2)
-	db.SetMaxIdleConns(0)
+	db.SetMaxOpenConns(10)
+	db.SetMaxIdleConns(10)
 
 	// Test Connection
 	testError := db.Ping()
@@ -39,7 +40,7 @@ func main() {
 	}
 
 	defer db.Close()
-	
+
 	var choice int
 	fmt.Println("=========================================")
 	fmt.Println("=           Account Service App         =")
@@ -51,15 +52,36 @@ func main() {
 	fmt.Println("--Action")
 	fmt.Printf("\t6. Top Up\n\t7. Transfer\n\t8. History Top Up\n\t9. History Transfer\n")
 	fmt.Println("--Others")
-	fmt.Printf("\t10. Cari User\n")
+	fmt.Printf("\t10. Cari User\n\t0. Keluar")
 	fmt.Printf("\n")
 	fmt.Printf("Pilih menu: ")
 	fmt.Scanln(&choice)
 
 	switch choice {
+	//Fitur Register
 	case 1:
-	
-	case 2: 
+		var name, phone, password string
+		fmt.Println("Masukkan nama pengguna: ")
+		fmt.Scanln(&name)
+		fmt.Println("Masukkan kata sandi: ")
+		fmt.Scanln(&password)
+		fmt.Println("Masukkan nomor telepon: ")
+		fmt.Scanln(&phone)
+
+		user := entities.Users{
+			Name:     name,
+			Phone:    phone,
+			Password: password,
+		}
+
+		newID, err := controllers.AddUser(db, user)
+		if err != nil {
+			fmt.Println("Gagal register: ", err.Error())
+		} else {
+			fmt.Println("Berhasil Register! ID Pengguna baru:", newID)
+		}
+
+	case 2:
 		var phone, password string
 		fmt.Printf("No. Hp: ")
 		fmt.Scanln(&phone)
