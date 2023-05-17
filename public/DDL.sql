@@ -6,8 +6,8 @@ CREATE TABLE users(
     name varchar(100),
 	phone varchar(50) not null unique,
     password varchar(50) not null,
-    is_login bool,
-    last_login timestamp,
+    balance int,
+    last_login datetime,
     created_at timestamp default current_timestamp
 );
 

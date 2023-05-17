@@ -131,6 +131,17 @@ func main() {
 			user := controllers.SearchUser(db, phone)
 			fmt.Printf("Nama: %s\n", user.Name)
 			fmt.Printf("No. Hp: %s\n", user.Phone)
+		case 7: 
+			var receiver, method string
+			var total uint64
+			fmt.Printf("Masukkan Nomor Telepon Penerima: ")
+			fmt.Scanln(&receiver)
+			fmt.Printf("Masukkan Metode Transfer: ")
+			fmt.Scanln(&method)
+			fmt.Printf("Masukkan jumlah yang ingin ditransfer: ")
+			fmt.Scanln(&total)
+			transferId := controllers.AddTransfer(db, receiver, method, total)
+			fmt.Printf("Sukses melakukan tranfer, Tranfer ID: %s", transferId)
 		}
 	}
 }
