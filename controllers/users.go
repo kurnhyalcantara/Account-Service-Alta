@@ -3,10 +3,10 @@ package controllers
 import (
 	"alta/account-service-app/entities"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 
+	"github.com/fatih/color"
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
@@ -86,24 +86,6 @@ func verifyPhoneRegistered(db *sql.DB, phone string) bool {
 	return false
 }
 
-// GetLoggedInUser mengembalikan data pengguna berdasarkan loggedInUserID
-func GetLoggedInUser(db *sql.DB, loggedInUserID string) (*entities.Users, error) {
-	// Query ke database untuk mendapatkan data pengguna berdasarkan loggedInUserID
-	query := "SELECT name, phone FROM users WHERE phone = ?"
-	row := db.QueryRow(query, loggedInUserID)
-
-	var user entities.Users
-	err := row.Scan(&user.Name, &user.Phone)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("Data pengguna tidak ditemukan")
-		}
-		return nil, err
-	}
-
-	return &user, nil
-}
-
 func updateUser(db *sql.DB, user entities.Users) entities.Users {
 	return entities.Users{}
 }
@@ -113,6 +95,8 @@ func DeleteUser(db *sql.DB) {
 	_, err := db.Exec("DELETE FROM users WHERE user_id = ?", userId)
 	if err != nil {
 		log.Fatal(err.Error())
+	} else {
+		color.HiGreen("Akun berhasil dihapus")
 	}
 }
 
@@ -125,4 +109,5 @@ func SearchUser(db *sql.DB, phone string) entities.Users {
 	return user
 }
 
-// }
+
+

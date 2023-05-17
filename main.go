@@ -101,10 +101,6 @@ func main() {
 			}
 
 		case 2:
-			// Memeriksa apakah ada user lain yang sedang login saat ini
-			if controllers.CheckLoginSession(db) != "" {
-				log.Fatal("LoginError: Terdapat User Lain yang sedang login")
-			}
 
 			var phone, password string
 			fmt.Printf("No. Hp: ")
