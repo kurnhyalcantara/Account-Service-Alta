@@ -86,10 +86,17 @@ func verifyPhoneRegistered(db *sql.DB, phone string) bool {
 	return false
 }
 
+// ShowUser menampilkan profil pengguna yang login
+func ShowUser(user *entities.Users) {
+	fmt.Println("Profil Pengguna:")
+	fmt.Printf("Nama: %s\n", user.Name)
+	fmt.Printf("Nomor Telepon: %s\n", user.Phone)
+}
+
 // GetLoggedInUser mengembalikan data pengguna berdasarkan loggedInUserID
 func GetLoggedInUser(db *sql.DB, loggedInUserID string) (*entities.Users, error) {
 	// Query ke database untuk mendapatkan data pengguna berdasarkan loggedInUserID
-	query := "SELECT name, phone FROM users WHERE phone = ?"
+	query := "SELECT name, phone FROM users WHERE user_id = ?"
 	row := db.QueryRow(query, loggedInUserID)
 
 	var user entities.Users
