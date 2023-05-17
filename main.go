@@ -60,11 +60,11 @@ func main() {
 	//Fitur Register
 	case 1:
 		var name, phone, password string
-		fmt.Println("Masukkan nama pengguna: ")
+		fmt.Printf("Masukkan Nama Lengkap: ")
 		fmt.Scanln(&name)
-		fmt.Println("Masukkan kata sandi: ")
+		fmt.Printf("Masukkan Kata Sandi: ")
 		fmt.Scanln(&password)
-		fmt.Println("Masukkan nomor telepon: ")
+		fmt.Printf("Masukkan Nomor Telepon: ")
 		fmt.Scanln(&phone)
 
 		user := entities.Users{
@@ -81,17 +81,22 @@ func main() {
 		}
 
 	case 2:
+		// Memeriksa apakah ada user lain yang sedang login saat ini
+		if controllers.CheckLoginSession(db) {
+			log.Fatal("LoginError: Terdapat User Lain yang sedang login")
+		}
+
 		var phone, password string
 		fmt.Printf("No. Hp: ")
 		fmt.Scanln(&phone)
 		fmt.Printf("Password: ")
 		fmt.Scanln(&password)
 
-		loginId, err := controllers.LoginUser(db, phone, password)
+		data, err := controllers.LoginUser(db, phone, password)
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Printf("Login berhasil! loginId: %s", loginId)
+			fmt.Printf("Login berhasil! Selamat datang %s!\nLogin at: %s\n", data[0], data[1])
 		}
 	
 	case 5: 

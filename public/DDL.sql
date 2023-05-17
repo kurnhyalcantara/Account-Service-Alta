@@ -36,7 +36,7 @@ CREATE TABLE transfer(
 );
 
 CREATE TABLE login_activity(
-	activity_id varchar(50) primary key,
-    phone varchar(50),
-    last_login timestamp default current_timestamp
+	user_id varchar(50) primary key,
+    login_at datetime default current_timestamp,
+    constraint fk_login_activity_user foreign key (user_id) REFERENCES users(user_id) on delete cascade
 );

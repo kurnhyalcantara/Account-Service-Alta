@@ -26,53 +26,42 @@ func AddUser(db *sql.DB, user entities.Users) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to add user to database: %v", err)
 	}
-	return userId, nil
+	return user.UserId, nil
 }
 
-func LoginUser(db *sql.DB, phone string, password string) (string, error) {
-	// Memeriksa apakah ada user lain yang sedang login saat ini
-	if checkLoginActivity(db) {
-		return "", fmt.Errorf("LoginUser: %s", "Terdapat User Lain yang sedang login")
-	}
-
+func LoginUser(db *sql.DB, phone string, password string) ([]string, error) {
 	// Memeriksa apakah phone terdaftar di database
 	if !verifyPhoneRegistered(db, phone) {
-		return "", fmt.Errorf("LoginUser: %s", "Nomor anda tidak terdaftar")
+		return []string{}, fmt.Errorf("LoginUser: %s", "Nomor anda tidak terdaftar")
 	}
 
 	// Memeriksa kredensial
-	credential, err := db.Query("SELECT password FROM users WHERE phone = ?", phone)
-	if err != nil {
-		return "", fmt.Errorf(err.Error())
-	}
-	if credential.Next() {
-		var passwordRegistered string
-		errScan := credential.Scan(&passwordRegistered)
-		if errScan != nil {
-			return "", fmt.Errorf(errScan.Error())
+	var passwordRegistered, userId, name string
+	err := db.QueryRow("SELECT user_id, name, password FROM users WHERE phone = ?", phone).Scan(&userId, &name, &passwordRegistered)
+		if err != nil {
+			return []string{}, fmt.Errorf(err.Error())
 		}
 		if passwordRegistered != password {
-			return "", fmt.Errorf("LoginUser: %s", "Password tidak cocok")
+			return []string{}, fmt.Errorf("LoginUser: %s", "Kredensial tidak valid")
 		}
-	}
 
 	// Store login activity
-	// Generate unique id dengan menggunakan library gonanoid
-	id, errNano := gonanoid.New(16)
-	if errNano != nil {
-		return "", fmt.Errorf("LoginUser: %v", errNano)
-	}
-	loginActivityId := "activityLogin-" + id
-	_, errInsert := db.Exec("INSERT INTO login_activity (activity_id, phone) VALUES (?, ?)", loginActivityId, phone)
-	// fmt.Println(errInsert.Error())
+	_, errInsert := db.Exec("INSERT INTO login_activity (user_id) VALUES (?)", userId)
 	if errInsert != nil {
-		return "", fmt.Errorf("LoginUser: %v", errInsert)
+		return []string{}, fmt.Errorf("LoginUser: %v", errInsert)
 	}
-	fmt.Println("Berhasil insert")
-	return phone, nil
+
+	// Get login time
+	var loginAt string
+	err = db.QueryRow("SELECT login_at FROM login_activity WHERE user_id = ?", userId).Scan(&loginAt)
+	if err != nil {
+		return []string{}, fmt.Errorf(err.Error())
+	}
+
+	return []string{name, loginAt}, nil
 }
 
-func checkLoginActivity(db *sql.DB) bool {
+func CheckLoginSession(db *sql.DB) bool {
 	query, err := db.Query("SELECT * FROM login_activity")
 	if err != nil {
 		log.Fatal("Error:", err.Error())
