@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/fatih/color"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
@@ -23,7 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error Connect to Database", err.Error())
 	} else {
-		fmt.Println("Database open!")
+		color.HiGreen("Database Open!")
 	}
 
 	// db.SetConnMaxLifetime(time.Minute * 10)
@@ -35,87 +36,105 @@ func main() {
 	if testError != nil {
 		log.Fatal("Error ping", testError.Error())
 	} else {
-		fmt.Println("Database connected!")
+		color.HiGreen("Database Connected!")
 	}
 
 	defer db.Close()
 
-	var choice int
-	fmt.Println("=========================================")
-	fmt.Println("=           Account Service App         =")
-	fmt.Println("=========================================")
-	fmt.Printf("\n")
-	fmt.Println("Menu:")
-	fmt.Println("--Account")
-	fmt.Printf("\t1. Sign Up\n\t2. Login\n\t3. Profile\n\t4. Edit Account\n\t5. Delete Account\n")
-	fmt.Println("--Action")
-	fmt.Printf("\t6. Top Up\n\t7. Transfer\n\t8. History Top Up\n\t9. History Transfer\n")
-	fmt.Println("--Others")
-	fmt.Printf("\t10. Cari User\n\t0. Keluar")
-	fmt.Printf("\n")
-	fmt.Printf("Pilih menu: ")
-	fmt.Scanln(&choice)
-	var loggedInUserID string // Deklarasikan variabel loggedInUserID dengan tipe string
-
-	switch choice {
-	//Fitur Register
-	case 1:
-		var name, phone, password string
-		fmt.Println("Masukkan nama pengguna: ")
-		fmt.Scanln(&name)
-		fmt.Println("Masukkan kata sandi: ")
-		fmt.Scanln(&password)
-		fmt.Println("Masukkan nomor telepon: ")
-		fmt.Scanln(&phone)
-
-		user := entities.Users{
-			Name:     name,
-			Phone:    phone,
-			Password: password,
+	for {
+		var choice int
+		userSession := controllers.CheckLoginSession(db)
+		if userSession == "" {
+			color.HiBlue("=========================================")
+			color.HiBlue("=           Account Service App         =")
+			color.HiBlue("=========================================")
+			fmt.Printf("\n")
+			fmt.Println("Menu:")
+			fmt.Println("--Account")
+			fmt.Printf("\t1. Sign Up\n\t2. Login\n")
+			fmt.Println("--Others")
+			fmt.Printf("\t10. Cari User\n\t0. Keluar")
+			fmt.Printf("\n")
+			fmt.Printf("Pilih menu: ")
+			fmt.Scanln(&choice)
+		} else {
+			color.HiBlue("=========================================")
+			color.HiBlue("=           Account Service App         =")
+			color.HiBlue("=========================================")
+			fmt.Printf("Anda login sebagai: ")
+			color.HiGreen(userSession)
+			fmt.Printf("\n")
+			fmt.Println("Menu:")
+			fmt.Println("--Account")
+			fmt.Printf("\t3. Profile\n\t4. Edit Account\n\t5. Delete Account\n")
+			fmt.Println("--Action")
+			fmt.Printf("\t6. Top Up\n\t7. Transfer\n\t8. History Top Up\n\t9. History Transfer\n")
+			fmt.Println("--Others")
+			fmt.Printf("\t10. Cari User\n\t0. Keluar")
+			fmt.Printf("\n")
+			fmt.Printf("Pilih menu: ")
+			fmt.Scanln(&choice)
 		}
 
-		newID, err := controllers.AddUser(db, user)
-		if err != nil {
-			fmt.Println("Gagal register: ", err.Error())
-		} else {
-			fmt.Println("Berhasil Register! ID Pengguna baru:", newID)
-		}
+		switch choice {
+		//Fitur Register
+		case 1:
+			var name, phone, password string
+			fmt.Printf("Masukkan Nama Lengkap: ")
+			fmt.Scanln(&name)
+			fmt.Printf("Masukkan Kata Sandi: ")
+			fmt.Scanln(&password)
+			fmt.Printf("Masukkan Nomor Telepon: ")
+			fmt.Scanln(&phone)
 
-	case 2:
-		var phone, password string
-		fmt.Printf("No. Hp: ")
-		fmt.Scanln(&phone)
-		fmt.Printf("Password: ")
-		fmt.Scanln(&password)
+			user := entities.Users{
+				Name:     name,
+				Phone:    phone,
+				Password: password,
+			}
 
-		loginId, err := controllers.LoginUser(db, phone, password)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			fmt.Printf("Login berhasil! loginId: %s", loginId)
-			loggedInUserID = fmt.Sprintf("%s", loginId) // Konversi loginID menjadi string dan assign ke loggedInUserID
-		}
-	case 3:
-		fmt.Printf("loginId: ")
-		fmt.Scanln(&loggedInUserID)
-		if loggedInUserID != loggedInUserID {
-			fmt.Println("Harap login terlebih dahulu untuk melihat profil.")
-		} else {
-			user, err := controllers.GetLoggedInUser(db, string(loggedInUserID)) // Konversi loggedInUserID menjadi int
+			newID, err := controllers.AddUser(db, user)
+			if err != nil {
+				fmt.Println("Gagal register: ", err.Error())
+			} else {
+				fmt.Println("Berhasil Register! ID Pengguna baru:", newID)
+			}
+
+		case 2:
+			// Memeriksa apakah ada user lain yang sedang login saat ini
+			if controllers.CheckLoginSession(db) != "" {
+				log.Fatal("LoginError: Terdapat User Lain yang sedang login")
+			}
+
+			var phone, password string
+			fmt.Printf("No. Hp: ")
+			fmt.Scanln(&phone)
+			fmt.Printf("Password: ")
+			fmt.Scanln(&password)
+
+			data, err := controllers.LoginUser(db, phone, password)
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				fmt.Println("Profil Pengguna:")
-				fmt.Println("Nama:", user.Name)
-				fmt.Println("Nomor Telepon:", user.Phone)
-				// Tampilkan informasi lainnya sesuai kebutuhan
+				color.HiGreen("Login Berhasil")
+				fmt.Printf("Selamat datang %s!\nLogin at: %s\n", data[0], data[1])
 			}
-		}
 
-	case 5:
-		var phone string
-		fmt.Printf("Masukkan No. Anda: ")
-		fmt.Scanln(&phone)
-		controllers.DeleteUser(db, phone)
+		case 5:
+			var opt string
+			fmt.Printf("Apakah anda yakin ingin menghapus akun anda? (Y/N): ")
+			fmt.Scanln(&opt)
+			if opt == "Y" {
+				controllers.DeleteUser(db)
+			}
+
+		case 10:
+			var phone string
+			fmt.Printf("Masukkan Nomor Telpon User: ")
+			fmt.Scanln(&phone)
+			user := controllers.SearchUser(db, phone)
+			fmt.Printf("Nama: %s\n", user.Name)
+			fmt.Printf("No. Hp: %s\n", user.Phone)
+		}
 	}
 }
