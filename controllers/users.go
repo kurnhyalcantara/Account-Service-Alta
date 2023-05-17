@@ -3,6 +3,7 @@ package controllers
 import (
 	"alta/account-service-app/entities"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -86,12 +87,30 @@ func verifyPhoneRegistered(db *sql.DB, phone string) bool {
 	query, err := db.Query("SELECT phone FROM users WHERE phone = ?", phone)
 	if err != nil {
 		log.Fatal("Error:", err.Error())
-	}	
-	
+	}
+
 	if query.Next() {
 		return true
 	}
 	return false
+}
+
+// GetLoggedInUser mengembalikan data pengguna berdasarkan loggedInUserID
+func GetLoggedInUser(db *sql.DB, loggedInUserID string) (*entities.Users, error) {
+	// Query ke database untuk mendapatkan data pengguna berdasarkan loggedInUserID
+	query := "SELECT name, phone FROM users WHERE phone = ?"
+	row := db.QueryRow(query, loggedInUserID)
+
+	var user entities.Users
+	err := row.Scan(&user.Name, &user.Phone)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("Data pengguna tidak ditemukan")
+		}
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func updateUser(db *sql.DB, user entities.Users) entities.Users {
@@ -110,6 +129,5 @@ func DeleteUser(db *sql.DB, phone string) {
 // 	if err != nil {
 // 		log.Fatal(err.Error())
 // 	}
-	
-// }
 
+// }

@@ -55,6 +55,7 @@ func main() {
 	fmt.Printf("\n")
 	fmt.Printf("Pilih menu: ")
 	fmt.Scanln(&choice)
+	var loggedInUserID string // Deklarasikan variabel loggedInUserID dengan tipe string
 
 	switch choice {
 	//Fitur Register
@@ -92,9 +93,26 @@ func main() {
 			fmt.Println(err)
 		} else {
 			fmt.Printf("Login berhasil! loginId: %s", loginId)
+			loggedInUserID = fmt.Sprintf("%s", loginId) // Konversi loginID menjadi string dan assign ke loggedInUserID
 		}
-	
-	case 5: 
+	case 3:
+		fmt.Printf("loginId: ")
+		fmt.Scanln(&loggedInUserID)
+		if loggedInUserID != loggedInUserID {
+			fmt.Println("Harap login terlebih dahulu untuk melihat profil.")
+		} else {
+			user, err := controllers.GetLoggedInUser(db, string(loggedInUserID)) // Konversi loggedInUserID menjadi int
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println("Profil Pengguna:")
+				fmt.Println("Nama:", user.Name)
+				fmt.Println("Nomor Telepon:", user.Phone)
+				// Tampilkan informasi lainnya sesuai kebutuhan
+			}
+		}
+
+	case 5:
 		var phone string
 		fmt.Printf("Masukkan No. Anda: ")
 		fmt.Scanln(&phone)
