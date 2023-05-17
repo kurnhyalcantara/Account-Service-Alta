@@ -40,7 +40,6 @@ func main() {
 	}
 
 	defer db.Close()
-
 	for {
 		var choice int
 		userSession := controllers.CheckLoginSession(db)
@@ -114,6 +113,15 @@ func main() {
 			} else {
 				color.HiGreen("Login Berhasil")
 				fmt.Printf("Selamat datang %s!\nLogin at: %s\n", data[0], data[1])
+			}
+
+		case 3:
+			// Pilihan menu 3
+			user, err := controllers.GetLoggedInUser(db, userSession)
+			if err != nil {
+				log.Println("Error:", err.Error())
+			} else {
+				controllers.ShowUser(user)
 			}
 
 		case 5:
