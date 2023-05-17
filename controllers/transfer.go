@@ -57,4 +57,25 @@ func AddTransfer(db *sql.DB, receiver, method string, total uint64) (idTransfer 
 	return transfer.TransferId
 }
 
-func
+func GetHistoryTransfer(db *sql.DB, userId string) []entities.Transfer {
+	var recordTransfers []entities.Transfer
+	query, err := db.Query("SELECT * FROM transfer WHERE user_id = ?", userId)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	for query.Next() {
+		var transferId, receiverId, senderId,  methodTransfer, createdAt string
+		var total uint64
+		query.Scan(&transferId, &receiverId, &senderId, &total, &methodTransfer, &createdAt)
+		transfer := entities.Transfer{
+			TransferId: transferId,
+			ReceiverId: receiverId,
+			UserId: senderId,
+			Total: total,
+			MethodTransfer: methodTransfer,
+			CreatedAt: createdAt,
+		}
+		recordTransfers = append(recordTransfers, transfer)
+	}
+	return recordTransfers
+}

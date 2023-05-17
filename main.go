@@ -150,6 +150,27 @@ func main() {
 			fmt.Scanln(&total)
 			transferId := controllers.AddTransfer(db, receiver, method, total)
 			fmt.Printf("Sukses melakukan tranfer, Tranfer ID: %s", transferId)
+		
+		case 9:
+			transferHistory := controllers.GetHistoryTransfer(db, userSession)
+			for _, transfer := range transferHistory {
+				userReceiver, err := controllers.GetLoggedInUser(db, transfer.ReceiverId)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				userSender, err := controllers.GetLoggedInUser(db, userSession)
+				if err != nil {
+					log.Fatal(err.Error())
+				}
+				fmt.Printf("\tID transfer: %s\n", transfer.TransferId)
+				fmt.Printf("\tNama Penerima: %s\n", userReceiver.Name)
+				fmt.Printf("\tNama Pengirim: %s\n", userSender.Name)
+				fmt.Printf("\tJumlah Transfer: %d\n", transfer.Total)
+				fmt.Printf("\tMethod Transfer: %s\n", transfer.MethodTransfer)
+				fmt.Printf("\tCreated At: %s\n", transfer.CreatedAt)
+				fmt.Println("\n========")
+			}
 		}
+
 	}
 }

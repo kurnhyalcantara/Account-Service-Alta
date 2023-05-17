@@ -6,4 +6,5 @@ type Transfer struct {
 	UserId         string
 	Total          uint64
 	MethodTransfer string
+	CreatedAt			 string
 }
