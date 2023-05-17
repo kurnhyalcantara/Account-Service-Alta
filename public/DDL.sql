@@ -11,12 +11,6 @@ CREATE TABLE users(
     created_at timestamp default current_timestamp
 );
 
-CREATE TABLE balance(
-	user_id varchar(50) primary key,
-    total int,
-    CONSTRAINT fk_balance_users FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
 CREATE TABLE top_up(
 	top_up_id varchar(50) primary key,
     total int,

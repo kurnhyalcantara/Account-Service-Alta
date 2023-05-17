@@ -56,3 +56,5 @@ func AddTransfer(db *sql.DB, receiver, method string, total uint64) (idTransfer 
 	
 	return transfer.TransferId
 }
+
+func
