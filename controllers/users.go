@@ -19,8 +19,9 @@ func AddUser(db *sql.DB, user entities.Users) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to generate UUID: %v", err)
 	}
+
 	// lakukan query untuk menyimpan data pengguna ke dalam database
-	user.UserId = userId
+	user.UserId = "user-" + userId
 	_, err = db.Exec("INSERT INTO users(user_id, name, phone, password) VALUES (?, ?, ?, ?)", user.UserId, user.Name, user.Phone, user.Password)
 	if err != nil {
 		return "", fmt.Errorf("failed to add user to database: %v", err)
