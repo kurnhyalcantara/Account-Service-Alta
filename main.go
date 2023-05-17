@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/fatih/color"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
@@ -23,7 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error Connect to Database", err.Error())
 	} else {
-		fmt.Println("Database open!")
+		color.HiGreen("Database Open!")
 	}
 
 	// db.SetConnMaxLifetime(time.Minute * 10)
@@ -35,26 +36,45 @@ func main() {
 	if testError != nil {
 		log.Fatal("Error ping", testError.Error())
 	} else {
-		fmt.Println("Database connected!")
+		color.HiGreen("Database Connected!")
 	}
 
 	defer db.Close()
 
-	var choice int
-	fmt.Println("=========================================")
-	fmt.Println("=           Account Service App         =")
-	fmt.Println("=========================================")
-	fmt.Printf("\n")
-	fmt.Println("Menu:")
-	fmt.Println("--Account")
-	fmt.Printf("\t1. Sign Up\n\t2. Login\n\t3. Profile\n\t4. Edit Account\n\t5. Delete Account\n")
-	fmt.Println("--Action")
-	fmt.Printf("\t6. Top Up\n\t7. Transfer\n\t8. History Top Up\n\t9. History Transfer\n")
-	fmt.Println("--Others")
-	fmt.Printf("\t10. Cari User\n\t0. Keluar")
-	fmt.Printf("\n")
-	fmt.Printf("Pilih menu: ")
-	fmt.Scanln(&choice)
+	for {
+		var choice int
+		userSession := controllers.CheckLoginSession(db)
+	if userSession == "" {
+		color.HiBlue("=========================================")
+		color.HiBlue("=           Account Service App         =")
+		color.HiBlue("=========================================")
+		fmt.Printf("\n")
+		fmt.Println("Menu:")
+		fmt.Println("--Account")
+		fmt.Printf("\t1. Sign Up\n\t2. Login\n")
+		fmt.Println("--Others")
+		fmt.Printf("\t10. Cari User\n\t0. Keluar")
+		fmt.Printf("\n")
+		fmt.Printf("Pilih menu: ")
+		fmt.Scanln(&choice)
+	} else {
+		color.HiBlue("=========================================")
+		color.HiBlue("=           Account Service App         =")
+		color.HiBlue("=========================================")
+		fmt.Printf("Anda login sebagai: ")
+		color.HiGreen(userSession)
+		fmt.Printf("\n")
+		fmt.Println("Menu:")
+		fmt.Println("--Account")
+		fmt.Printf("\t3. Profile\n\t4. Edit Account\n\t5. Delete Account\n")
+		fmt.Println("--Action")
+		fmt.Printf("\t6. Top Up\n\t7. Transfer\n\t8. History Top Up\n\t9. History Transfer\n")
+		fmt.Println("--Others")
+		fmt.Printf("\t10. Cari User\n\t0. Keluar")
+		fmt.Printf("\n")
+		fmt.Printf("Pilih menu: ")
+		fmt.Scanln(&choice)
+	}
 
 	switch choice {
 	//Fitur Register
@@ -82,7 +102,7 @@ func main() {
 
 	case 2:
 		// Memeriksa apakah ada user lain yang sedang login saat ini
-		if controllers.CheckLoginSession(db) {
+		if controllers.CheckLoginSession(db) != "" {
 			log.Fatal("LoginError: Terdapat User Lain yang sedang login")
 		}
 
@@ -96,13 +116,25 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Printf("Login berhasil! Selamat datang %s!\nLogin at: %s\n", data[0], data[1])
+			color.HiGreen("Login Berhasil")
+			fmt.Printf("Selamat datang %s!\nLogin at: %s\n", data[0], data[1])
 		}
 	
-	case 5: 
+	case 5:
+		var opt string
+		fmt.Printf("Apakah anda yakin ingin menghapus akun anda? (Y/N): ")
+		fmt.Scanln(&opt)
+		if opt == "Y" {
+			controllers.DeleteUser(db)
+		}
+	
+	case 10 : 
 		var phone string
-		fmt.Printf("Masukkan No. Anda: ")
+		fmt.Printf("Masukkan Nomor Telpon User: ")
 		fmt.Scanln(&phone)
-		controllers.DeleteUser(db, phone)
+		user := controllers.SearchUser(db, phone)
+		fmt.Printf("Nama: %s\n", user.Name)
+		fmt.Printf("No. Hp: %s\n", user.Phone)
+	}
 	}
 }

@@ -61,15 +61,16 @@ func LoginUser(db *sql.DB, phone string, password string) ([]string, error) {
 	return []string{name, loginAt}, nil
 }
 
-func CheckLoginSession(db *sql.DB) bool {
-	query, err := db.Query("SELECT * FROM login_activity")
+func CheckLoginSession(db *sql.DB) string {
+	query, err := db.Query("SELECT user_id FROM login_activity")
 	if err != nil {
 		log.Fatal("Error:", err.Error())
 	}
+	var userId string
 	if query.Next() {
-		return true
+		query.Scan(&userId)
 	}
-	return false
+	return userId
 }
 
 func verifyPhoneRegistered(db *sql.DB, phone string) bool {
@@ -88,18 +89,20 @@ func updateUser(db *sql.DB, user entities.Users) entities.Users {
 	return entities.Users{}
 }
 
-func DeleteUser(db *sql.DB, phone string) {
-	_, err := db.Exec("DELETE FROM users WHERE phone = ?", phone)
+func DeleteUser(db *sql.DB) {
+	userId := CheckLoginSession(db)
+	_, err := db.Exec("DELETE FROM users WHERE user_id = ?", userId)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
-// func SearchUser(db *sql.DB, phone string) {
-// 	query, err := db.Query("SELECT name, phone FROM users WHERE phone = ?", phone)
-// 	if err != nil {
-// 		log.Fatal(err.Error())
-// 	}
-	
-// }
+func SearchUser(db *sql.DB, phone string) entities.Users {
+	var user entities.Users
+	err := db.QueryRow("SELECT name, phone FROM users WHERE phone = ?", phone).Scan(&user.Name, &user.Phone)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	return user
+}
 
