@@ -3,6 +3,7 @@ package controllers
 import (
 	"alta/account-service-app/entities"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -38,12 +39,12 @@ func LoginUser(db *sql.DB, phone string, password string) ([]string, error) {
 	// Memeriksa kredensial
 	var passwordRegistered, userId, name string
 	err := db.QueryRow("SELECT user_id, name, password FROM users WHERE phone = ?", phone).Scan(&userId, &name, &passwordRegistered)
-		if err != nil {
-			return []string{}, fmt.Errorf(err.Error())
-		}
-		if passwordRegistered != password {
-			return []string{}, fmt.Errorf("LoginUser: %s", "Kredensial tidak valid")
-		}
+	if err != nil {
+		return []string{}, fmt.Errorf(err.Error())
+	}
+	if passwordRegistered != password {
+		return []string{}, fmt.Errorf("LoginUser: %s", "Kredensial tidak valid")
+	}
 
 	// Store login activity
 	_, errInsert := db.Exec("INSERT INTO login_activity (user_id) VALUES (?)", userId)
@@ -77,12 +78,30 @@ func verifyPhoneRegistered(db *sql.DB, phone string) bool {
 	query, err := db.Query("SELECT phone FROM users WHERE phone = ?", phone)
 	if err != nil {
 		log.Fatal("Error:", err.Error())
-	}	
-	
+	}
+
 	if query.Next() {
 		return true
 	}
 	return false
+}
+
+// GetLoggedInUser mengembalikan data pengguna berdasarkan loggedInUserID
+func GetLoggedInUser(db *sql.DB, loggedInUserID string) (*entities.Users, error) {
+	// Query ke database untuk mendapatkan data pengguna berdasarkan loggedInUserID
+	query := "SELECT name, phone FROM users WHERE phone = ?"
+	row := db.QueryRow(query, loggedInUserID)
+
+	var user entities.Users
+	err := row.Scan(&user.Name, &user.Phone)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("Data pengguna tidak ditemukan")
+		}
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func updateUser(db *sql.DB, user entities.Users) entities.Users {
@@ -106,3 +125,4 @@ func SearchUser(db *sql.DB, phone string) entities.Users {
 	return user
 }
 
+// }
