@@ -227,13 +227,6 @@ func main() {
 			fmt.Println("Saldo terkini:", saldo)
 			break
 
-		case 10:
-			var phone string
-			fmt.Printf("Masukkan Nomor Telpon User: ")
-			fmt.Scanln(&phone)
-			user := controllers.SearchUser(db, phone)
-			fmt.Printf("Nama: %s\n", user.Name)
-			fmt.Printf("No. Hp: %s\n", user.Phone)
 		case 7:
 			var receiver, method string
 			var total uint64
@@ -245,6 +238,35 @@ func main() {
 			fmt.Scanln(&total)
 			transferId := controllers.AddTransfer(db, receiver, method, total)
 			fmt.Printf("Sukses melakukan tranfer, Tranfer ID: %s", transferId)
+
+		case 8:
+			// Cek apakah pengguna sudah login
+			if userSession == "" {
+				fmt.Println("Anda belum login.")
+				return
+			}
+
+			// Panggil fungsi GetTopUpHistoryByUser untuk mendapatkan riwayat top up pengguna
+			history, err := controllers.GetTopUpHistory(db, userSession)
+			if err != nil {
+				fmt.Println("Gagal mengambil riwayat top up:", err.Error())
+				return
+			}
+
+			// Tampilkan riwayat top up
+			fmt.Println("Riwayat Top Up:")
+			for _, topUp := range history {
+				fmt.Printf("TopupId: %s\nTotal: %d\nMetode Pembayaran: %s\nWaktu: %s\n\n", topUp.TopUpId, topUp.Total, topUp.PaymentMethod, topUp.Time)
+			}
+
+		case 10:
+			var phone string
+			fmt.Printf("Masukkan Nomor Telpon User: ")
+			fmt.Scanln(&phone)
+			user := controllers.SearchUser(db, phone)
+			fmt.Printf("Nama: %s\n", user.Name)
+			fmt.Printf("No. Hp: %s\n", user.Phone)
+
 		}
 	}
 }
