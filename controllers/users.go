@@ -164,16 +164,17 @@ func ShowUser(user *entities.Users) {
 	fmt.Println("Profil Pengguna:")
 	fmt.Printf("Nama: %s\n", user.Name)
 	fmt.Printf("Nomor Telepon: %s\n", user.Phone)
+	fmt.Printf("Saldo: %d\n", user.Balance)
 }
 
 // GetLoggedInUser mengembalikan data pengguna berdasarkan loggedInUserID
 func GetLoggedInUser(db *sql.DB, loggedInUserID string) (*entities.Users, error) {
 	// Query ke database untuk mendapatkan data pengguna berdasarkan loggedInUserID
-	query := "SELECT name, phone FROM users WHERE user_id = ?"
+	query := "SELECT name, phone, balance FROM users WHERE user_id = ?"
 	row := db.QueryRow(query, loggedInUserID)
 
 	var user entities.Users
-	err := row.Scan(&user.Name, &user.Phone)
+	err := row.Scan(&user.Name, &user.Phone, &user.Balance)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, errors.New("Data pengguna tidak ditemukan")
@@ -182,4 +183,11 @@ func GetLoggedInUser(db *sql.DB, loggedInUserID string) (*entities.Users, error)
 	}
 
 	return &user, nil
+}
+
+func LogOut(db *sql.DB, userId string) {
+	_, err := db.Exec("DELETE FROM login_activity WHERE user_id = ?", userId)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }

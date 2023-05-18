@@ -269,13 +269,7 @@ func main() {
 				choice = 99
 			}
 			for choice == 8 {
-				// Cek apakah pengguna sudah login
 				clearScreen()
-				if userSession == "" {
-					fmt.Println("Anda belum login.")
-					return
-				}
-
 				// Panggil fungsi GetTopUpHistoryByUser untuk mendapatkan riwayat top up pengguna
 				history, err := controllers.GetTopUpHistory(db, userSession)
 				if err != nil {
@@ -289,7 +283,7 @@ func main() {
 					fmt.Printf("TopupId: %s\nTotal: %d\nMetode Pembayaran: %s\nWaktu: %s\n\n", topUp.TopUpId, topUp.Total, topUp.PaymentMethod, topUp.Time)
 				}
 				fmt.Println("Tekan Enter untuk kembali ke menu")
-				fmt.Println()
+				fmt.Scanln()
 				choice = 99
 			}
 			for choice == 9 {
@@ -331,9 +325,10 @@ func main() {
 		}
 		if choice == 0 {
 			fmt.Println("Terima kasih telah bertransaksi...")
+			controllers.LogOut(db, userSession)
 			os.Exit(0)
 		}
-	}
+}
 
 	func displayBanner() {
 		color.HiBlue("=========================================")
