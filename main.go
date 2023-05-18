@@ -268,6 +268,30 @@ func main() {
 				fmt.Scanln()
 				choice = 99
 			}
+			for choice == 8 {
+				// Cek apakah pengguna sudah login
+				clearScreen()
+				if userSession == "" {
+					fmt.Println("Anda belum login.")
+					return
+				}
+
+				// Panggil fungsi GetTopUpHistoryByUser untuk mendapatkan riwayat top up pengguna
+				history, err := controllers.GetTopUpHistory(db, userSession)
+				if err != nil {
+					fmt.Println("Gagal mengambil riwayat top up:", err.Error())
+					return
+				}
+
+				// Tampilkan riwayat top up
+				fmt.Println("Riwayat Top Up:")
+				for _, topUp := range history {
+					fmt.Printf("TopupId: %s\nTotal: %d\nMetode Pembayaran: %s\nWaktu: %s\n\n", topUp.TopUpId, topUp.Total, topUp.PaymentMethod, topUp.Time)
+				}
+				fmt.Println("Tekan Enter untuk kembali ke menu")
+				fmt.Println()
+				choice = 99
+			}
 			for choice == 9 {
 				clearScreen()
 				transferHistory := controllers.GetHistoryTransfer(db, userSession)
@@ -323,7 +347,5 @@ func main() {
 		cmd.Run()
 		displayBanner()
 	}
-
-
 
 

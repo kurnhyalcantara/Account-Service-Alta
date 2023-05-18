@@ -98,3 +98,32 @@ func deleteTopUp(db *sql.DB, topUpID string) error {
 
 	return nil
 }
+
+func GetTopUpHistory(db *sql.DB, userID string) ([]entities.TopUp, error) {
+	query := "SELECT top_up_id, total, payment_method, user_id, created_at FROM top_up WHERE user_id = ?"
+
+	rows, err := db.Query(query, userID)
+	if err != nil {
+		return nil, fmt.Errorf("Gagal mengambil riwayat top up: %v", err)
+	}
+	defer rows.Close()
+
+	var history []entities.TopUp
+
+	for rows.Next() {
+		var topUp entities.TopUp
+
+		err := rows.Scan(&topUp.TopUpId, &topUp.Total, &topUp.PaymentMethod, &topUp.UserId, &topUp.Time)
+		if err != nil {
+			return nil, fmt.Errorf("Gagal membaca data riwayat top up: %v", err)
+		}
+
+		history = append(history, topUp)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("Gagal membaca data riwayat top up: %v", err)
+	}
+
+	return history, nil
+}
