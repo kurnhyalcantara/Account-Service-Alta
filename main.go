@@ -40,6 +40,7 @@ func main() {
 	}
 
 	defer db.Close()
+
 	for {
 		var choice int
 		userSession := controllers.CheckLoginSession(db)
@@ -116,12 +117,63 @@ func main() {
 			}
 
 		case 3:
-			// Pilihan menu 3
-			user, err := controllers.GetLoggedInUser(db, userSession)
-			if err != nil {
-				log.Println("Error:", err.Error())
+			// Memeriksa apakah pengguna sudah login
+			if userSession == "" {
+				fmt.Println("Anda belum login.")
 			} else {
-				controllers.ShowUser(user)
+				// Memanggil fungsi ShowProfilUser untuk mendapatkan profil pengguna yang login
+				profilUser, err := controllers.ShowProfilUser(db, userSession)
+				if err != nil {
+					fmt.Println("Gagal Memuat Profil:", err.Error())
+				} else {
+					fmt.Println("Profil Pengguna:")
+					fmt.Println("Name:", profilUser.Name)
+					fmt.Println("Phone:", profilUser.Phone)
+					fmt.Println("Password:", profilUser.Password)
+					fmt.Println("Balance:", profilUser.Balance)
+				}
+			}
+
+		case 4:
+			// Case 4: Perbarui Profil
+			fmt.Println("Data apa yang ingin Anda perbarui?")
+			fmt.Println("1. Nama")
+			fmt.Println("2. Nomor Telepon")
+			fmt.Println("3. Kata Sandi")
+			fmt.Println("0. Gak jadi")
+			fmt.Print("Pilihan Anda: ")
+			var fieldToUpdate int
+			fmt.Scanln(&fieldToUpdate)
+
+			if fieldToUpdate == 0 {
+				fmt.Println("Anda telah keluar dari opsi update profil.")
+				break
+			} else if fieldToUpdate < 1 || fieldToUpdate > 3 {
+				fmt.Println("Pilihan tidak valid. Silakan pilih data yang ingin diubah dengan benar.")
+				continue
+			}
+
+			var dataToUpdate string
+			switch fieldToUpdate {
+			case 1:
+				fmt.Print("Masukkan Nama Lengkap Baru: ")
+				fmt.Scanln(&dataToUpdate)
+			case 2:
+				fmt.Print("Masukkan Nomor Telepon Baru: ")
+				fmt.Scanln(&dataToUpdate)
+			case 3:
+				fmt.Print("Masukkan Kata Sandi Baru: ")
+				fmt.Scanln(&dataToUpdate)
+			default:
+				fmt.Println("Pilihan tidak valid. Silakan pilih data yang ingin diubah dengan benar.")
+				return
+			}
+
+			err = controllers.UpdateUserProfile(db, userSession, fieldToUpdate, dataToUpdate)
+			if err != nil {
+				fmt.Printf("Gagal memperbarui data: %s\n", err.Error())
+			} else {
+				fmt.Println("Data berhasil diperbarui!")
 			}
 
 		case 5:
@@ -139,7 +191,7 @@ func main() {
 			user := controllers.SearchUser(db, phone)
 			fmt.Printf("Nama: %s\n", user.Name)
 			fmt.Printf("No. Hp: %s\n", user.Phone)
-		case 7: 
+		case 7:
 			var receiver, method string
 			var total uint64
 			fmt.Printf("Masukkan Nomor Telepon Penerima: ")
