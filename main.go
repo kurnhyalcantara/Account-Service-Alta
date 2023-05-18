@@ -109,6 +109,9 @@ func main() {
 				fmt.Scanln()
 				userSession = controllers.CheckLoginSession(db)
 				userDataLogin, err := controllers.GetLoggedInUser(db, userSession)
+				if err != nil {
+					fmt.Println(err.Error())
+				}
 				userData = userDataLogin
 				choice = 99
 				break

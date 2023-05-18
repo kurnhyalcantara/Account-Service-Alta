@@ -3,6 +3,7 @@ package controllers
 import (
 	"alta/account-service-app/entities"
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -156,4 +157,29 @@ func SearchUser(db *sql.DB, phone string) entities.Users {
 		log.Fatal(err.Error())
 	}
 	return user
+}
+
+// ShowUser menampilkan profil pengguna yang login
+func ShowUser(user *entities.Users) {
+	fmt.Println("Profil Pengguna:")
+	fmt.Printf("Nama: %s\n", user.Name)
+	fmt.Printf("Nomor Telepon: %s\n", user.Phone)
+}
+
+// GetLoggedInUser mengembalikan data pengguna berdasarkan loggedInUserID
+func GetLoggedInUser(db *sql.DB, loggedInUserID string) (*entities.Users, error) {
+	// Query ke database untuk mendapatkan data pengguna berdasarkan loggedInUserID
+	query := "SELECT name, phone FROM users WHERE user_id = ?"
+	row := db.QueryRow(query, loggedInUserID)
+
+	var user entities.Users
+	err := row.Scan(&user.Name, &user.Phone)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.New("Data pengguna tidak ditemukan")
+		}
+		return nil, err
+	}
+
+	return &user, nil
 }
