@@ -26,7 +26,9 @@ CREATE TABLE transfer(
     user_id varchar(50),
     total int, 
     method_transfer varchar(50),
-    created_at timestamp default current_timestamp
+    created_at timestamp default current_timestamp,
+    constraint fk_transfer_receiver foreign key (receiver_id) REFERENCES users(user_id),
+    constraint fk_transfer_user foreign key (user_id) REFERENCES users(user_id)
 );
 
 CREATE TABLE login_activity(
