@@ -195,6 +195,8 @@ func main() {
 					fmt.Printf("Gagal memperbarui data: %s\n", err.Error())
 				} else {
 					fmt.Println("Data berhasil diperbarui!")
+					fmt.Scanln()
+					choice = 99
 				}
 			}	
 			for choice == 5 {
@@ -247,7 +249,8 @@ func main() {
 	
 				fmt.Println("Top up berhasil dilakukan!")
 				fmt.Println("Saldo terkini:", saldo)
-				break
+				fmt.Scanln()
+				choice = 99
 			}
 			for choice == 7 {
 				clearScreen()
