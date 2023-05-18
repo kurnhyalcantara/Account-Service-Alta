@@ -3,7 +3,6 @@ package controllers
 import (
 	"alta/account-service-app/entities"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 
@@ -87,34 +86,58 @@ func verifyPhoneRegistered(db *sql.DB, phone string) bool {
 	return false
 }
 
-// ShowUser menampilkan profil pengguna yang login
-func ShowUser(user *entities.Users) {
-	fmt.Println("Profil Pengguna:")
-	fmt.Printf("Nama: %s\n", user.Name)
-	fmt.Printf("Nomor Telepon: %s\n", user.Phone)
-}
-
-// GetLoggedInUser mengembalikan data pengguna berdasarkan loggedInUserID
-func GetLoggedInUser(db *sql.DB, loggedInUserID string) (*entities.Users, error) {
-	// Query ke database untuk mendapatkan data pengguna berdasarkan loggedInUserID
-	query := "SELECT name, phone FROM users WHERE user_id = ?"
-	row := db.QueryRow(query, loggedInUserID)
-
+func ShowProfilUser(db *sql.DB, userId string) (entities.Users, error) {
 	var user entities.Users
-	err := row.Scan(&user.Name, &user.Phone)
+
+	// Query database untuk mendapatkan data pengguna berdasarkan userId
+	err := db.QueryRow("SELECT name, phone, password, balance FROM users WHERE user_id = ?", userId).Scan(&user.Name, &user.Phone, &user.Password, &user.Balance)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, errors.New("Data pengguna tidak ditemukan")
-		}
-		return nil, err
+		return entities.Users{}, err
 	}
 
-	return &user, nil
+	return user, nil
 }
 
-func updateUser(db *sql.DB, user entities.Users) entities.Users {
-	return entities.Users{}
+// UpdateUserProfile mengupdate data pengguna berdasarkan user ID.
+func UpdateUserProfile(db *sql.DB, userId string, fieldToUpdate int, dataToUpdate string) error {
+	// Cek apakah pengguna sudah login
+	if userId == "" {
+		return fmt.Errorf("Anda belum login.")
+	}
+
+	var updateField string
+	switch fieldToUpdate {
+	case 1:
+		updateField = "name"
+	case 2:
+		updateField = "phone"
+	case 3:
+		updateField = "password"
+	default:
+		return fmt.Errorf("Pilihan tidak valid. Silakan pilih data yang ingin diubah dengan benar.")
+	}
+
+	// Query untuk mengupdate data pengguna
+	query := fmt.Sprintf("UPDATE users SET %s = ? WHERE user_id = ?", updateField)
+
+	// Eksekusi query update
+	_, err := db.Exec(query, dataToUpdate, userId)
+	if err != nil {
+		return fmt.Errorf("Gagal memperbarui %s: %s", updateField, err.Error())
+	}
+
+	return nil
 }
+
+// // UpdateUserProfile mengupdate data pengguna berdasarkan user ID.
+// func UpdateUserProfile(db *sql.DB, userId string, name string, phone string, password string) error {
+// 	query := "UPDATE users SET name = ?, phone = ?, password = ? WHERE user_id = ?"
+// 	_, err := db.Exec(query, name, phone, password, userId)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func DeleteUser(db *sql.DB) {
 	userId := CheckLoginSession(db)
@@ -134,6 +157,3 @@ func SearchUser(db *sql.DB, phone string) entities.Users {
 	}
 	return user
 }
-
-
-
