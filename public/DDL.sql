@@ -34,3 +34,7 @@ CREATE TABLE login_activity(
     login_at datetime default current_timestamp,
     constraint fk_login_activity_user foreign key (user_id) REFERENCES users(user_id) on delete cascade
 );
+
+select * from users;
+select * from login_activity;
+select * from top_up

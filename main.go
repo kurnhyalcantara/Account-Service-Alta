@@ -109,10 +109,6 @@ func main() {
 				fmt.Scanln()
 				userSession = controllers.CheckLoginSession(db)
 				userDataLogin, err := controllers.GetLoggedInUser(db, userSession)
-				if err != nil {
-					fmt.Println(err.Error())
-					userData = &entities.Users{}
-				}
 				userData = userDataLogin
 				choice = 99
 				break
@@ -126,6 +122,10 @@ func main() {
 			user := controllers.SearchUser(db, phone)
 			fmt.Printf("Nama: %s\n", user.Name)
 			fmt.Printf("No. Hp: %s\n", user.Phone)
+		}
+		if choice == 0 {
+			fmt.Println("Terima kasih telah bertransaksi...")
+			os.Exit(0)
 		}
 	}
 
@@ -143,7 +143,7 @@ func main() {
 			fmt.Printf("\t10. Cari User\n\t0. Keluar")
 			fmt.Printf("\n")
 			fmt.Printf("Pilih menu: ")
-			fmt.Scanln(&choice)
+			fmt.Scanln(&choice)		
 			for choice == 3 {
 				user, err := controllers.GetLoggedInUser(db, userSession)
 				if err != nil {
@@ -156,6 +156,44 @@ func main() {
 					choice = 99
 				}
 			}
+			for choice == 4 {
+				// Fitur Edit Profil
+				fmt.Println("Data apa yang ingin Anda perbarui?")
+				fmt.Println("1. Nama")
+				fmt.Println("2. Nomor Telepon")
+				fmt.Println("3. Kata Sandi")
+				fmt.Println("0. Gak jadi")
+				fmt.Print("Pilihan Anda: ")
+				var fieldToUpdate int
+				fmt.Scanln(&fieldToUpdate)
+	
+				if fieldToUpdate == 0 {
+					fmt.Println("Anda telah keluar dari opsi update profil.")
+				}
+	
+				var dataToUpdate string
+				switch fieldToUpdate {
+				case 1:
+					fmt.Print("Masukkan Nama Lengkap Baru: ")
+					fmt.Scanln(&dataToUpdate)
+				case 2:
+					fmt.Print("Masukkan Nomor Telepon Baru: ")
+					fmt.Scanln(&dataToUpdate)
+				case 3:
+					fmt.Print("Masukkan Kata Sandi Baru: ")
+					fmt.Scanln(&dataToUpdate)
+				default:
+					fmt.Println("Pilihan tidak valid. Silakan pilih data yang ingin diubah dengan benar.")
+					return
+				}
+	
+				err = controllers.UpdateUserProfile(db, userSession, fieldToUpdate, dataToUpdate)
+				if err != nil {
+					fmt.Printf("Gagal memperbarui data: %s\n", err.Error())
+				} else {
+					fmt.Println("Data berhasil diperbarui!")
+				}
+			}	
 			for choice == 5 {
 				var opt string
 				fmt.Printf("Apakah anda yakin ingin menghapus akun anda? (Y/N): ")
@@ -165,6 +203,48 @@ func main() {
 					userSession = controllers.CheckLoginSession(db)
 					break
 				}
+			}
+			for choice == 6 {
+				//Fitur Topup
+				fmt.Println("Top Up")
+				fmt.Print("Masukkan jumlah top up: ")
+				var amount uint64
+				fmt.Scanln(&amount)
+	
+				fmt.Println("Pilih metode pembayaran:")
+				fmt.Println("1. Credit Card")
+				fmt.Println("2. Transfer Bank")
+				var paymentMethod int
+				fmt.Print("Pilihan Anda: ")
+				fmt.Scanln(&paymentMethod)
+	
+				var paymentMethodStr string
+				switch paymentMethod {
+				case 1:
+					paymentMethodStr = "Credit Card"
+				case 2:
+					paymentMethodStr = "Transfer Bank"
+				default:
+					fmt.Println("Pilihan tidak valid.")
+					continue
+				}
+	
+				err := controllers.TopUp(db, userSession, amount, paymentMethodStr)
+				if err != nil {
+					fmt.Println("Gagal melakukan top up:", err.Error())
+					continue
+				}
+	
+				// Jika top up berhasil, tampilkan saldo terkini
+				saldo, err := controllers.GetSaldo(db, userSession)
+				if err != nil {
+					fmt.Println("Gagal mendapatkan saldo:", err.Error())
+					continue
+				}
+	
+				fmt.Println("Top up berhasil dilakukan!")
+				fmt.Println("Saldo terkini:", saldo)
+				break
 			}
 			for choice == 7 {
 				clearScreen()
