@@ -117,6 +117,7 @@ func main() {
 			}
 
 		case 3:
+			//Fitur Profil
 			// Memeriksa apakah pengguna sudah login
 			if userSession == "" {
 				fmt.Println("Anda belum login.")
@@ -135,7 +136,7 @@ func main() {
 			}
 
 		case 4:
-			// Case 4: Perbarui Profil
+			// Fitur Edit Profil
 			fmt.Println("Data apa yang ingin Anda perbarui?")
 			fmt.Println("1. Nama")
 			fmt.Println("2. Nomor Telepon")
@@ -183,6 +184,48 @@ func main() {
 			if opt == "Y" {
 				controllers.DeleteUser(db)
 			}
+
+		case 6:
+			//Fitur Topup
+			fmt.Println("Top Up")
+			fmt.Print("Masukkan jumlah top up: ")
+			var amount uint64
+			fmt.Scanln(&amount)
+
+			fmt.Println("Pilih metode pembayaran:")
+			fmt.Println("1. Credit Card")
+			fmt.Println("2. Transfer Bank")
+			var paymentMethod int
+			fmt.Print("Pilihan Anda: ")
+			fmt.Scanln(&paymentMethod)
+
+			var paymentMethodStr string
+			switch paymentMethod {
+			case 1:
+				paymentMethodStr = "Credit Card"
+			case 2:
+				paymentMethodStr = "Transfer Bank"
+			default:
+				fmt.Println("Pilihan tidak valid.")
+				continue
+			}
+
+			err := controllers.TopUp(db, userSession, amount, paymentMethodStr)
+			if err != nil {
+				fmt.Println("Gagal melakukan top up:", err.Error())
+				continue
+			}
+
+			// Jika top up berhasil, tampilkan saldo terkini
+			saldo, err := controllers.GetSaldo(db, userSession)
+			if err != nil {
+				fmt.Println("Gagal mendapatkan saldo:", err.Error())
+				continue
+			}
+
+			fmt.Println("Top up berhasil dilakukan!")
+			fmt.Println("Saldo terkini:", saldo)
+			break
 
 		case 10:
 			var phone string
