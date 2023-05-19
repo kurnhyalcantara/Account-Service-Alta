@@ -1,4 +1,4 @@
-# Account-Service
+# Account-Service-Alta
 
 Ini adalah aplikasi Account-Service yang dikembangkan menggunakan bahasa pemrograman Golang dan MySQL sebagai database.
 
