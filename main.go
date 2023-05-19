@@ -213,6 +213,7 @@ func main() {
 				fmt.Printf("Gagal memperbarui data: %s\n", err.Error())
 			} else {
 				fmt.Println("Data berhasil diperbarui!")
+				userData, err = controllers.GetLoggedInUser(db, userSession)
 				fmt.Scanln()
 				choice = 99
 			}
