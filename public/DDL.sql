@@ -21,11 +21,13 @@ CREATE TABLE top_up(
 );
 
 CREATE TABLE transfer(
-	transfer_id varchar(50) primary key,
+	id int primary key auto_increment,
+	transfer_id varchar(50),
     receiver_id varchar(50),
     user_id varchar(50),
     total int, 
     method_transfer varchar(50),
+    status enum("In", "Out"),
     created_at timestamp default current_timestamp,
     constraint fk_transfer_receiver foreign key (receiver_id) REFERENCES users(user_id),
     constraint fk_transfer_user foreign key (user_id) REFERENCES users(user_id)

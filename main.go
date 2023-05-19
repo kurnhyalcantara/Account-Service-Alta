@@ -273,15 +273,30 @@ func main() {
 		}
 		for choice == 7 {
 			clearScreen()
-			var receiver, method string
+			var receiver string
 			var total uint64
 			fmt.Printf("Masukkan Nomor Telepon Penerima: ")
 			fmt.Scanln(&receiver)
-			fmt.Printf("Masukkan Metode Transfer: ")
-			fmt.Scanln(&method)
+			fmt.Println("Pilih metode transfer:")
+			fmt.Println("1. Bank")
+			fmt.Println("2. Dana")
+			var paymentMethod int
+			fmt.Print("Pilihan Anda: ")
+			fmt.Scanln(&paymentMethod)
+
+			var paymentMethodStr string
+			switch paymentMethod {
+			case 1:
+				paymentMethodStr = "Credit Card"
+			case 2:
+				paymentMethodStr = "Transfer Bank"
+			default:
+				fmt.Println("Pilihan tidak valid.")
+				continue
+			}
 			fmt.Printf("Masukkan jumlah yang ingin ditransfer: ")
 			fmt.Scanln(&total)
-			transferId := controllers.AddTransfer(db, receiver, method, total)
+			transferId := controllers.AddTransfer(db, receiver, paymentMethodStr, total)
 			fmt.Printf("Sukses melakukan tranfer, Tranfer ID: %s\n", transferId)
 			fmt.Println("Press Enter untuk kembali ke menu")
 			fmt.Scanln()
