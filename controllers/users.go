@@ -15,6 +15,7 @@ import (
 // Fungsi ini menerima parameter db yang merupakan objek database yang sudah terkoneksi,
 // dan user yang merupakan data pengguna yang ingin ditambahkan ke database.
 // Fungsi ini mengembalikan ID pengguna yang baru saja ditambahkan ke database.
+
 func AddUser(db *sql.DB, user entities.Users) (string, error) {
 	// generate unique ID untuk pengguna baru
 	userId, err := gonanoid.New(16)
