@@ -8,6 +8,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"regexp"
+	"unicode"
 
 	"github.com/fatih/color"
 	_ "github.com/go-sql-driver/mysql"
@@ -78,7 +80,14 @@ func main() {
 				fmt.Println("Data tidak valid. Pastikan semua field terisi.")
 				continue // Kembali ke menu register
 			}
-
+			if regexp.MustCompile(`[0-9]`).MatchString(name) {
+				fmt.Println("Nama Lengkap tidak boleh mengandung angka.")
+				continue // Kembali ke menu register
+			}
+			if !isPasswordValid(password) {
+				fmt.Println("Kata sandi tidak valid. Pastikan terdiri dari minimal 8 karakter dan mengandung kombinasi huruf besar, huruf kecil, angka, dan simbol.")
+				continue
+			}
 			// Cek apakah nomor telepon sudah digunakan sebelumnya
 			var count int
 			err := db.QueryRow("SELECT COUNT(*) FROM users WHERE phone = ?", phone).Scan(&count)
@@ -89,6 +98,11 @@ func main() {
 			if count > 0 {
 				fmt.Println("Nomor telepon sudah digunakan. Silakan coba dengan nomor telepon baru.")
 				continue // Kembali ke menu register
+			}
+
+			if !isPhoneValid(phone) {
+				fmt.Println("Nomor telepon tidak valid. Pastikan terdiri dari 10 hingga 12 digit dan hanya berisi angka.")
+				continue
 			}
 
 			user := entities.Users{
@@ -376,4 +390,45 @@ func clearScreen() {
 	cmd.Stdout = os.Stdout
 	cmd.Run()
 	displayBanner()
+}
+
+func isPhoneValid(phone string) bool {
+	// Memeriksa apakah nomor telepon hanya terdiri dari angka
+	if !regexp.MustCompile(`^[0-9]+$`).MatchString(phone) {
+		return false
+	}
+
+	// Memeriksa panjang nomor telepon
+	if len(phone) < 10 || len(phone) > 12 {
+		return false
+	}
+
+	return true
+}
+
+func isPasswordValid(password string) bool {
+	// Memeriksa panjang kata sandi
+	if len(password) < 8 {
+		return false
+	}
+
+	// Memeriksa apakah kata sandi mengandung huruf besar, huruf kecil, angka, dan simbol
+	hasUppercase := false
+	hasLowercase := false
+	hasDigit := false
+	hasSymbol := false
+
+	for _, ch := range password {
+		if unicode.IsUpper(ch) {
+			hasUppercase = true
+		} else if unicode.IsLower(ch) {
+			hasLowercase = true
+		} else if unicode.IsDigit(ch) {
+			hasDigit = true
+		} else {
+			hasSymbol = true
+		}
+	}
+
+	return hasUppercase && hasLowercase && hasDigit && hasSymbol
 }
