@@ -301,9 +301,9 @@ func main() {
 			var paymentMethodStr string
 			switch paymentMethod {
 			case 1:
-				paymentMethodStr = "Credit Card"
+				paymentMethodStr = "Bank"
 			case 2:
-				paymentMethodStr = "Transfer Bank"
+				paymentMethodStr = "Dana"
 			default:
 				fmt.Println("Pilihan tidak valid.")
 				continue

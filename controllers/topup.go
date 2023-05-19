@@ -8,7 +8,6 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-// TopUp melakukan proses top up dengan jumlah yang diberikan dan metode pembayaran
 func TopUp(db *sql.DB, userId string, amount uint64, paymentMethod string) error {
 	// Cek apakah pengguna sudah login
 	if userId == "" {

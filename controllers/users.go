@@ -11,11 +11,6 @@ import (
 	gonanoid "github.com/matoous/go-nanoid/v2"
 )
 
-// AddUser berfungsi untuk menambahkan data pengguna baru ke dalam database.
-// Fungsi ini menerima parameter db yang merupakan objek database yang sudah terkoneksi,
-// dan user yang merupakan data pengguna yang ingin ditambahkan ke database.
-// Fungsi ini mengembalikan ID pengguna yang baru saja ditambahkan ke database.
-
 func AddUser(db *sql.DB, user entities.Users) (string, error) {
 	// generate unique ID untuk pengguna baru
 	userId, err := gonanoid.New(16)
@@ -130,16 +125,6 @@ func UpdateUserProfile(db *sql.DB, userId string, fieldToUpdate int, dataToUpdat
 
 	return nil
 }
-
-// // UpdateUserProfile mengupdate data pengguna berdasarkan user ID.
-// func UpdateUserProfile(db *sql.DB, userId string, name string, phone string, password string) error {
-// 	query := "UPDATE users SET name = ?, phone = ?, password = ? WHERE user_id = ?"
-// 	_, err := db.Exec(query, name, phone, password, userId)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
 
 func DeleteUser(db *sql.DB) {
 	userId := CheckLoginSession(db)
