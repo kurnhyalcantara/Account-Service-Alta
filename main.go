@@ -294,11 +294,12 @@ func main() {
 					if err != nil {
 						log.Fatal(err.Error())
 					}
-					userSender, err := controllers.GetLoggedInUser(db, userSession)
+					userSender, err := controllers.GetLoggedInUser(db, transfer.UserId)
 					if err != nil {
 						log.Fatal(err.Error())
 					}
 					fmt.Println("\n========================================")
+					fmt.Printf("\tStatus: %s\n", transfer.Status)
 					fmt.Printf("\tID transfer: %s\n", transfer.TransferId)
 					fmt.Printf("\tNama Penerima: %s\n", userReceiver.Name)
 					fmt.Printf("\tNama Pengirim: %s\n", userSender.Name)

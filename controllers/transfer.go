@@ -46,7 +46,11 @@ func AddTransfer(db *sql.DB, receiver, method string, total uint64) (idTransfer 
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		_, err = db.Exec("INSERT INTO transfer (transfer_id, receiver_id, user_id, total, method_transfer) VALUES (?, ?, ?, ?, ?)", transfer.TransferId, transfer.ReceiverId, transfer.UserId, transfer.Total, transfer.MethodTransfer)
+		_, err = db.Exec("INSERT INTO transfer (transfer_id, receiver_id, user_id, total, method_transfer, status) VALUES (?, ?, ?, ?, ?, ?)", transfer.TransferId, transfer.ReceiverId, transfer.UserId, transfer.Total, transfer.MethodTransfer, "Out")
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		_, err = db.Exec("INSERT INTO transfer (transfer_id, receiver_id, user_id, total, method_transfer, status) VALUES (?, ?, ?, ?, ?, ?)", transfer.TransferId, transfer.ReceiverId, transfer.UserId, transfer.Total, transfer.MethodTransfer, "In")
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -59,20 +63,21 @@ func AddTransfer(db *sql.DB, receiver, method string, total uint64) (idTransfer 
 
 func GetHistoryTransfer(db *sql.DB, userId string) []entities.Transfer {
 	var recordTransfers []entities.Transfer
-	query, err := db.Query("SELECT * FROM transfer WHERE user_id = ?", userId)
+	query, err := db.Query("SELECT transfer_id, receiver_id, user_id, total, method_transfer, status, created_at FROM transfer WHERE (user_id = ? && status = ?) || (receiver_id = ? && status = ?) ORDER BY created_at DESC", userId, "Out", userId, "In")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	for query.Next() {
-		var transferId, receiverId, senderId,  methodTransfer, createdAt string
+		var transferId, receiverId, senderId,  methodTransfer, status, createdAt string
 		var total uint64
-		query.Scan(&transferId, &receiverId, &senderId, &total, &methodTransfer, &createdAt)
+		query.Scan(&transferId, &receiverId, &senderId, &total, &methodTransfer, &status, &createdAt)
 		transfer := entities.Transfer{
 			TransferId: transferId,
 			ReceiverId: receiverId,
 			UserId: senderId,
 			Total: total,
 			MethodTransfer: methodTransfer,
+			Status: status,
 			CreatedAt: createdAt,
 		}
 		recordTransfers = append(recordTransfers, transfer)
